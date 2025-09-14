@@ -1,26 +1,26 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Swagger COnfig
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// middleware-1
+app.Use(async (HttpContext context, RequestDelegate next) =>
 {
-  app.UseSwagger();
-  app.UseSwaggerUI();
-}
+  /**
+  /* !! 当访问 localhost：3000, 会产产生两个 "request" ，"/favicon.ico"  and "/"
+  **/
+  Console.WriteLine(context.Request.Path);
+  Console.WriteLine("1");
+  await context.Response.WriteAsync("hello1");
+  await next(context);
+});
 
-// 自动将所有 HTTP 请求重定向到 HTTPS，提升安全性。
-app.UseHttpsRedirection();
-
-app.MapGet("/", () => "Hello world");
-
-app.MapGet("/{id}", (string id) => $"{id}");
-
-app.MapGet("/query", (HttpRequest req) => $"{req.Query["id"]}");
-
+// middleware-2
+app.Use(async (HttpContext context, RequestDelegate next) =>
+{
+  Console.WriteLine(context.Request.Path);
+  Console.WriteLine("2");
+  await context.Response.WriteAsync("hello2");
+});
 
 app.Run();
