@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using FirstProject.ConventionalMiddleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,5 +49,21 @@ app.UseCustomizedMiddlewaresOneExtension();
 
 // middleware-6 使用 conventional middleware
 app.UseConventionalMiddlewareOne();
+
+app.UseWhen(
+  (context) => context.Request.Query.ContainsKey("gender"),
+  app =>
+  {
+    app.Use(async (context, next) =>
+    {
+      await context.Response.WriteAsync($" {context.Request.Query["gender"]}");
+      await next();
+    });
+  });
+
+app.Run(async (context) =>
+  {
+    await context.Response.WriteAsync(" back to the main chain");
+  });
 
 app.Run();
